@@ -26,6 +26,6 @@ void loop() {
     }
     PORTB |= (1 << PB2);
     PORTB &= ~(1 << PB2);
-    delayMicroseconds(7.8125);
+    delayMicroseconds(4);
   }
 }
