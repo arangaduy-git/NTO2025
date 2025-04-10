@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
 ser = serial.Serial('COM4', 115200)
-npoints = 30  # кол-во точек на графике
+npoints = 256  # кол-во точек на графике
 x = deque([0], maxlen=npoints)
 y_signal_unfiltered = deque([0], maxlen=npoints)
 y_signal_filtered = deque([0], maxlen=npoints)
@@ -45,9 +45,11 @@ def get_ints(line):
         for j in range(len(line[i])):
             if line[i][j] in '0123456789':
                 ch += line[i][j]
+            if line[i][j] == '.':
+                ch += '.'
         if ch == '':
             ch = 0
-        A.append(int(ch))
+        A.append(float(ch))
     if len(A) < 3:
         return None
     return A
@@ -72,6 +74,8 @@ def update(dy):
         inted = get_ints(line_received)
         if inted:
             x.append(x[-1] + 1)  # update data
+            if inted[0] > 5.5:
+                print(line_received)
             y_signal_unfiltered.append(inted[0])
             y_signal_filtered.append(inted[1])
 
@@ -81,8 +85,8 @@ def update(dy):
             line_filtered_analog_summer.set_xdata(x)  # update plot data
             line_filtered_analog_summer.set_ydata(y_signal_filtered)
 
-            plot_filtered_analog_summer.set_yticks(np.arange(-1, 6 + 1, 1))
-            plot_unfiltered_analog_summer.set_yticks(np.arange(-1, 6 + 1, 1))
+            plot_filtered_analog_summer.set_yticks(np.arange(-0.5, 5 + 1, 0.5))
+            plot_unfiltered_analog_summer.set_yticks(np.arange(-0.5, 5 + 1, 0.5))
 
             frq_unfiltered, frq_Y_unfiltered = fourier(y_signal_unfiltered)
             amplitude_frequency_unfiltered_analog_summer.clear()
@@ -96,13 +100,13 @@ def update(dy):
             amplitude_frequency_filtered_analog_summer.set_title('Амплитудно-частотная после фильтрации')
             amplitude_frequency_filtered_analog_summer.plot(frq_filtered, frq_Y_filtered, 'r')
 
-            text_info.clear()
-            text_info.set_yticks([])
-            text_info.set_xticks([])
-            text_info.text(0.1, 0.77, f'Коэффициент пульсации: {round(dy, 3)}', fontsize=10)
-            text_info.text(0.1, 0.57, f'Сила тока: {round(dy, 3)}А', fontsize=10)
-            text_info.text(0.1, 0.37, f'Напряжение: {round(dy, 3)}В', fontsize=10)
-            text_info.text(0.1, 0.17, f'Мгновенная мощность: {round(dy, 3)}Вт', fontsize=10)
+            # text_info.clear()
+            # text_info.set_yticks([])
+            # text_info.set_xticks([])
+            # text_info.text(0.1, 0.77, f'Коэффициент пульсации: {round(dy, 3)}', fontsize=10)
+            # text_info.text(0.1, 0.57, f'Сила тока: {round(dy, 3)}А', fontsize=10)
+            # text_info.text(0.1, 0.37, f'Напряжение: {round(dy, 3)}В', fontsize=10)
+            # text_info.text(0.1, 0.17, f'Мгновенная мощность: {round(dy, 3)}Вт', fontsize=10)
 
             plot_unfiltered_analog_summer.relim()
             plot_filtered_analog_summer.relim()
@@ -110,12 +114,12 @@ def update(dy):
             plot_unfiltered_analog_summer.autoscale_view(False, True, False)
             plot_filtered_analog_summer.autoscale_view(False, True, False)
         else:
-            print('skipped')
+            print('skipped:', line_received)
     except Exception as e:
         print('ERROR:', e)
 
     return line_unfiltered_analog_summer, plot_unfiltered_analog_summer, plot_filtered_analog_summer
 
 
-ani = animation.FuncAnimation(fig, func=update, interval=50)
+ani = animation.FuncAnimation(fig, func=update, interval=3)
 plt.show()

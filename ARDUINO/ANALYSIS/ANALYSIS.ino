@@ -1,13 +1,13 @@
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(115200);
+  pinMode(A0, INPUT);
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
-  for (int i = 0; i <= 5; i++){
-    String myString = String(i) + "|" + String(5 - i) + "|" + String(5 - i);
-    Serial.println(myString);
-    delay(50);
-  }
+  int sensor_value = analogRead(A0);
+  float voltage = sensor_value * (5.0 / 1023.0);
+  Serial.println(String(voltage) + "|20|20");
+  delay(2);
 }
