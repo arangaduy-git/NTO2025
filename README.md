@@ -2,9 +2,9 @@
 
 Директория UI - Анализатор сигнала<br>
 Директория ARDUINO - Код для arduino:
-1. GENERATOR1_25 - Генератор №1
-2. GENERATOR2_375 - Генератор №2
-3. GENERATOR3_15625 - Генератор №3<br>
+1. GENERATOR1_250 - Генератор №1
+2. GENERATOR2_1500 - Генератор №2
+3. GENERATOR3_4000 - Генератор №3<br>
 
 Директория SCHEMATICUS - Электросхемы:
 1. generator.pdf - схема генератора<br>
