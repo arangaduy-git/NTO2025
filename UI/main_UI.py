@@ -63,63 +63,54 @@ def fourier(y):
     frq = k / T  # two sides frequency range
     frq = frq[range(n // 2)]  # one side frequency range
 
-    Y = scipy.fft.fft(y) / n  # fft computing and normalization
+    Y = np.fft.fft(y) / n  # fft computing and normalization
     Y = Y[range(n // 2)]
     return frq, abs(Y)
 
 
 def update(dy):
     try:
-        line_received = ser.readline().decode("utf-8")
-        inted = get_ints(line_received)
-        if inted:
-            x.append(x[-1] + 1)  # update data
-            if inted[0] > 5.5:
-                print(line_received)
-            y_signal_unfiltered.append(inted[0])
-            y_signal_filtered.append(inted[1])
+        A = []
+        while ser.inWaiting() > 0:
+            line_received = ser.readline().decode("utf-8")
+            inted = get_ints(line_received)
 
-            line_unfiltered_analog_summer.set_xdata(x)  # update plot data
-            line_unfiltered_analog_summer.set_ydata(y_signal_unfiltered)
+            if inted:
+                x.append(x[-1] + 1)  # update data
+                y_signal_unfiltered.append(inted[0])
+            # else:
+            #     print('skipped:', line_received)
 
-            line_filtered_analog_summer.set_xdata(x)  # update plot data
-            line_filtered_analog_summer.set_ydata(y_signal_filtered)
+        line_unfiltered_analog_summer.set_xdata(x)  # update plot data
+        line_unfiltered_analog_summer.set_ydata(y_signal_unfiltered)
 
-            plot_filtered_analog_summer.set_yticks(np.arange(-0.5, 5 + 1, 0.5))
-            plot_unfiltered_analog_summer.set_yticks(np.arange(-0.5, 5 + 1, 0.5))
+        line_filtered_analog_summer.set_xdata(x)  # update plot data
+        line_filtered_analog_summer.set_ydata(y_signal_filtered)
 
-            frq_unfiltered, frq_Y_unfiltered = fourier(y_signal_unfiltered)
-            amplitude_frequency_unfiltered_analog_summer.clear()
-            amplitude_frequency_unfiltered_analog_summer.set(xlabel='Частота', ylabel='Амплитуда')
-            amplitude_frequency_unfiltered_analog_summer.set_title('Амплитудно-частотная до фильтрации')
-            amplitude_frequency_unfiltered_analog_summer.plot(frq_unfiltered, frq_Y_unfiltered, 'r')
+        plot_filtered_analog_summer.set_yticks(np.arange(-0.5, 5 + 1, 0.5))
+        plot_unfiltered_analog_summer.set_yticks(np.arange(-0.5, 5 + 1, 0.5))
 
-            frq_filtered, frq_Y_filtered = fourier(y_signal_filtered)
-            amplitude_frequency_filtered_analog_summer.clear()
-            amplitude_frequency_filtered_analog_summer.set(xlabel='Частота', ylabel='Амплитуда')
-            amplitude_frequency_filtered_analog_summer.set_title('Амплитудно-частотная после фильтрации')
-            amplitude_frequency_filtered_analog_summer.plot(frq_filtered, frq_Y_filtered, 'r')
+        frq_unfiltered, frq_Y_unfiltered = fourier(y_signal_unfiltered)
+        amplitude_frequency_unfiltered_analog_summer.clear()
+        amplitude_frequency_unfiltered_analog_summer.set(xlabel='Частота', ylabel='Амплитуда')
+        amplitude_frequency_unfiltered_analog_summer.set_title('Амплитудно-частотная до фильтрации')
+        amplitude_frequency_unfiltered_analog_summer.plot(frq_unfiltered, frq_Y_unfiltered, 'r')
 
-            # text_info.clear()
-            # text_info.set_yticks([])
-            # text_info.set_xticks([])
-            # text_info.text(0.1, 0.77, f'Коэффициент пульсации: {round(dy, 3)}', fontsize=10)
-            # text_info.text(0.1, 0.57, f'Сила тока: {round(dy, 3)}А', fontsize=10)
-            # text_info.text(0.1, 0.37, f'Напряжение: {round(dy, 3)}В', fontsize=10)
-            # text_info.text(0.1, 0.17, f'Мгновенная мощность: {round(dy, 3)}Вт', fontsize=10)
+        frq_filtered, frq_Y_filtered = fourier(y_signal_filtered)
+        amplitude_frequency_filtered_analog_summer.clear()
+        amplitude_frequency_filtered_analog_summer.set(xlabel='Частота', ylabel='Амплитуда')
+        amplitude_frequency_filtered_analog_summer.set_title('Амплитудно-частотная после фильтрации')
+        amplitude_frequency_filtered_analog_summer.plot(frq_filtered, frq_Y_filtered, 'r')
+        plot_unfiltered_analog_summer.relim()
+        plot_filtered_analog_summer.relim()
 
-            plot_unfiltered_analog_summer.relim()
-            plot_filtered_analog_summer.relim()
-
-            plot_unfiltered_analog_summer.autoscale_view(False, True, False)
-            plot_filtered_analog_summer.autoscale_view(False, True, False)
-        else:
-            print('skipped:', line_received)
+        plot_unfiltered_analog_summer.autoscale_view(False, True, False)
+        plot_filtered_analog_summer.autoscale_view(False, True, False)
     except Exception as e:
         print('ERROR:', e)
 
     return line_unfiltered_analog_summer, plot_unfiltered_analog_summer, plot_filtered_analog_summer
 
 
-ani = animation.FuncAnimation(fig, func=update, interval=3)
+ani = animation.FuncAnimation(fig, func=update, interval=2)
 plt.show()
