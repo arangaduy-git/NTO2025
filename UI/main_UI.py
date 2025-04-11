@@ -1,4 +1,3 @@
-import scipy
 import serial
 import numpy as np
 from collections import deque
@@ -70,7 +69,6 @@ def fourier(y):
 
 def update(dy):
     try:
-        A = []
         while ser.inWaiting() > 0:
             line_received = ser.readline().decode("utf-8")
             inted = get_ints(line_received)
@@ -78,6 +76,8 @@ def update(dy):
             if inted:
                 x.append(x[-1] + 1)  # update data
                 y_signal_unfiltered.append(inted[0])
+                y_signal_filtered.append(inted[1])
+
             # else:
             #     print('skipped:', line_received)
 
@@ -101,6 +101,7 @@ def update(dy):
         amplitude_frequency_filtered_analog_summer.set(xlabel='Частота', ylabel='Амплитуда')
         amplitude_frequency_filtered_analog_summer.set_title('Амплитудно-частотная после фильтрации')
         amplitude_frequency_filtered_analog_summer.plot(frq_filtered, frq_Y_filtered, 'r')
+
         plot_unfiltered_analog_summer.relim()
         plot_filtered_analog_summer.relim()
 
